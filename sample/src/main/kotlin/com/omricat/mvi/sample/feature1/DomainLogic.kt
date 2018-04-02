@@ -1,4 +1,4 @@
-package com.omricat.mvi.sample
+package com.omricat.mvi.sample.feature1
 
 import com.omricat.mvi.Controller
 import com.omricat.mvi.Reducer
@@ -23,7 +23,7 @@ fun greetingRequestedController(name: Single<String>)
       .switchMap { name.toObservable().map(::greetingReducer) }
   }
 
-val exitRequestedController: Controller<Event, ViewState> = {
+fun exitRequestedController(): Controller<Event, ViewState> = {
   it.ofType<Event.ExitRequested>().map { { _: ViewState -> ViewState.Exit } }
 }
 

@@ -1,29 +1,28 @@
 package com.omricat.mvi.sample
 
-import com.omricat.mvi.LogicController
-import com.omricat.mvi.ViewBindingComponent
-import com.omricat.mvi.ViewBindingModule
-import com.omricat.mvi.listLogicController
+import com.omricat.mvi.sample.feature1.Feature1Component
+import com.omricat.mvi.sample.feature2.CatRepository
+import com.omricat.mvi.sample.feature2.DefaultCatRepository
+import com.omricat.mvi.sample.feature2.Feature2Component
 import dagger.Component
 import dagger.Module
 import dagger.Provides
 import io.reactivex.Single
 
-@Component(modules = [MviSampleModule::class])
-interface MviSampleComponent: ViewBindingComponent<Event, ViewState>
+@Component(modules = [DataModule::class])
+interface MviSampleComponent {
+  val feature1Component: Feature1Component
+  val feature2Component: Feature2Component
+}
+
 
 @Module
-class MviSampleModule : ViewBindingModule<Event, ViewState>() {
+class DataModule {
 
   @Provides
-  fun logicController(name: Single<String>): LogicController<Event, ViewState> =
-    listLogicController(
-      initialState = ViewState.NoGreeting,
-      controllers = listOf(greetingRequestedController(name), exitRequestedController)
-    )
+  fun catRepository(instance: DefaultCatRepository): CatRepository =
+    instance
 
   @Provides
   fun name(): Single<String> = Single.just("Dave")
 }
-
-fun component() = DaggerMviSampleComponent.create()
