@@ -40,7 +40,7 @@ subprojects {
   }
 
   group = "com.omricat"
-  version = "0.0.1"
+  version = "0.1"
 
   tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.6"
