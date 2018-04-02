@@ -8,6 +8,8 @@ dependencies {
 
   implementation(Deps.Javax.inject)
 
+  implementation(Deps.Omricat.kommons)
+
   testImplementation(Deps.Test.junit)
   testImplementation(Deps.Kotlin.test)
 }

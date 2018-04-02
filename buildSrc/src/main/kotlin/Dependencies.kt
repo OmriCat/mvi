@@ -10,7 +10,7 @@ object Versions {
   const val targetSdk = 27
 
   object Omricat {
-    const val kommons = "0.1.3"
+    const val kommons = "0.3.2"
   }
 
   object Support {
