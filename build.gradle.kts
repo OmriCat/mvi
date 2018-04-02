@@ -19,7 +19,15 @@ apply {
   plugin("kotlin")
 }
 
-allprojects {
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  resolutionRules("com.netflix.nebula:gradle-resolution-rules:0.52.0")
+}
+
+subprojects {
 
   buildscript {
     repositories {
@@ -46,14 +54,26 @@ allprojects {
 
   apply {
     plugin("kotlin")
+    plugin("maven-publish")
     plugin(Deps.Build.Nebula.resolutionRules)
   }
-}
 
-repositories {
-  mavenCentral()
-}
+  tasks {
+    val sourcesJar by creating(Jar::class) {
+      dependsOn(JavaPlugin.CLASSES_TASK_NAME)
+      classifier = "sources"
+      from(java.sourceSets["main"].allSource)
+    }
 
-dependencies {
-  resolutionRules("com.netflix.nebula:gradle-resolution-rules:0.52.0")
+    val javadocJar by tasks.creating(Jar::class) {
+      dependsOn(JavaPlugin.JAVADOC_TASK_NAME)
+      classifier = "javadoc"
+      from(java.docsDir)
+    }
+
+    artifacts {
+      add("archives", sourcesJar)
+      add("archives", javadocJar)
+    }
+  }
 }
