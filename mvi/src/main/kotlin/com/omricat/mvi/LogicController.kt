@@ -3,6 +3,7 @@ package com.omricat.mvi
 import com.jakewharton.rx.ReplayingShare
 import com.jakewharton.rxrelay2.BehaviorRelay
 import com.jakewharton.rxrelay2.Relay
+import com.omricat.kommons.applyIf
 import io.reactivex.Observable
 
 interface LogicController<E, T> : Function<T> {
@@ -10,7 +11,9 @@ interface LogicController<E, T> : Function<T> {
 }
 
 class StandardLogicController<E, T>(
-  private val initialState: T, private val controller: Controller<E, T>
+  private val initialState: T,
+  skipInitialEmission: Boolean = false,
+  private val controller: Controller<E, T>
 ) : LogicController<E, T> {
 
   private val uiEvents: Relay<Observable<in E>> = BehaviorRelay.create()
@@ -18,8 +21,10 @@ class StandardLogicController<E, T>(
   private val viewState: Observable<T> = uiEvents
     .switchMap { uiEvents ->
       controller(uiEvents)
-        .scan(initialState) { state, reducer -> reducer(state) }
-        .skip(1)
+        .scan(initialState) { state, reducer ->
+          reducer(state)
+        }
+        .applyIf(skipInitialEmission) { skip(1) }
     }
     .distinctUntilChanged()
     .compose(ReplayingShare.instance())
@@ -43,8 +48,8 @@ fun <E, T> listLogicController(
     }
   }
 
-typealias Controller<T, S> = (Observable<in T>) -> Observable<Reducer<S>>
-
+typealias Controller<T, S> = (Observable<in T>) -> Observable<out Reducer<S>>
 
 typealias Reducer<T> = (T) -> T
+
 
