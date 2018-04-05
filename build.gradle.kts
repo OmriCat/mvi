@@ -14,9 +14,7 @@ buildscript {
 plugins {
   kotlin("jvm") version Versions.kotlin
   id(Deps.Build.Nebula.resolutionRules) version Versions.Build.Nebula.resolutionRules
-}
-apply {
-  plugin("kotlin")
+  `maven-publish`
 }
 
 repositories {
@@ -26,6 +24,8 @@ repositories {
 dependencies {
   resolutionRules("com.netflix.nebula:gradle-resolution-rules:0.52.0")
 }
+
+val dontPublishProjects = listOf("sample")
 
 subprojects {
 
@@ -53,27 +53,34 @@ subprojects {
   }
 
   apply {
+    plugin("java")
     plugin("kotlin")
     plugin("maven-publish")
     plugin(Deps.Build.Nebula.resolutionRules)
   }
 
-  tasks {
-    val sourcesJar by creating(Jar::class) {
-      dependsOn(JavaPlugin.CLASSES_TASK_NAME)
-      classifier = "sources"
-      from(java.sourceSets["main"].allSource)
-    }
+  val sourcesJar by tasks.creating(Jar::class) {
+    dependsOn(JavaPlugin.CLASSES_TASK_NAME)
+    classifier = "sources"
+    from(java.sourceSets["main"].allSource)
+  }
 
-    val javadocJar by tasks.creating(Jar::class) {
-      dependsOn(JavaPlugin.JAVADOC_TASK_NAME)
-      classifier = "javadoc"
-      from(java.docsDir)
-    }
+  val javadocJar by tasks.creating(Jar::class) {
+    dependsOn(JavaPlugin.JAVADOC_TASK_NAME)
+    classifier = "javadoc"
+    from(java.docsDir)
+  }
 
-    artifacts {
-      add("archives", sourcesJar)
-      add("archives", javadocJar)
+  if (name !in dontPublishProjects) {
+
+    publishing {
+      (publications) {
+        "mavenJava".invoke(MavenPublication::class) {
+          from(components["java"])
+          artifact(sourcesJar)
+          artifact(javadocJar)
+        }
+      }
     }
   }
 }
